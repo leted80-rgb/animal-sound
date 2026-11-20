@@ -1933,8 +1933,7 @@ window.ANIMALS = [
   }
   function leaveBig() {
     document.body.classList.remove("want-land");
-    try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) { /* 무시 */ }
-    try { if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen(); } catch (e) { /* 무시 */ }
+    // 전체 화면·가로 고정은 풀지 않음(⌂로 나가거나 한 판이 끝나도 유지). 풀 때는 처음 화면의 ⛶ 단추
     try { if (wakeLock) { wakeLock.release(); wakeLock = null; } } catch (e) { /* 무시 */ }
     try { $("thVid").pause(); } catch (e) { /* 무시 */ }   // 숨은 화면에서 영상이 계속 돌지 않게
     $("thStage").classList.remove("listening"); $("thCry").parentNode.classList.remove("follow"); thShowPaused(false);

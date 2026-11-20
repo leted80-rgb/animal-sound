@@ -1,11 +1,12 @@
-// 처음 한 번 연 뒤에는 인터넷 없이도 열리게: 게임 파일을 기기에 저장해 둠
-const C = "animal-sound-v1";
-self.addEventListener("install", (e) => { e.waitUntil(caches.open(C).then((c) => c.addAll(["./", "index.html", "manifest.json", "icon-180.png", "icon-192.png"])).then(() => self.skipWaiting())); });
-self.addEventListener("activate", (e) => { e.waitUntil(self.clients.claim()); });
+// 인터넷이 되면 항상 새 판을 받고(받은 것은 저장), 안 되면 저장해 둔 사본으로 연다
+const C = "animal-sound-v2";
+const CORE = ["./", "index.html", "manifest.json", "icon-180.png", "icon-192.png"];
+self.addEventListener("install", (e) => { e.waitUntil(caches.open(C).then((c) => c.addAll(CORE.map((u) => new Request(u, { cache: "reload" })))).then(() => self.skipWaiting())); });
+self.addEventListener("activate", (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== C).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
-  e.respondWith(caches.match(e.request, { ignoreSearch: true }).then((hit) => hit || fetch(e.request).then((r) => {
+  e.respondWith(fetch(e.request, { cache: "no-cache" }).then((r) => {
     if (r && (r.ok || r.type === "opaque")) { const cp = r.clone(); caches.open(C).then((c) => c.put(e.request, cp)); }
     return r;
-  }).catch(() => caches.match("index.html"))));
+  }).catch(() => caches.match(e.request, { ignoreSearch: true }).then((hit) => hit || caches.match("index.html"))));
 });
